@@ -1,14 +1,14 @@
-"""
-Task: Build a Mini Rider Tracker
+# """
+# Task: Build a Mini Rider Tracker
 
-Create a simple Python program that:
+# Create a simple Python program that:
 
-Defines a Rider class.
+# Defines a Rider class.
 
-Allows each rider to make deliveries and earn money.
+# Allows each rider to make deliveries and earn money.
 
-Displays their name, total earnings, and number of deliveries.
-"""
+# Displays their name, total earnings, and number of deliveries.
+# """
 
 
 class Sender:
@@ -18,9 +18,9 @@ class Sender:
 
         print("== Create A Delivery Order ==")
         # This code is Taking User Order Details.
-        self.name = input("Enter your name: ")
-        self.item = input("What are you sending today? ")
-        self.destination = input("Enter the destination you want this package to be sent: ")
+        self.name = input("Enter your name: ").lower()
+        self.item = input("What are you sending today? ").lower()
+        self.destination = input("Enter the destination you want this package to be sent: ").lower()
 
         return {
             "sender_name": self.name,
@@ -30,6 +30,28 @@ class Sender:
             "status": "pending"
         }
     
+class RiderWallet():
+    def __init__(self, rider_name):
+        self.rider_name = rider_name
+        self.__balance = 0.00
+        print(f"Welcome, {self.rider_name} and your balance is: {self.__balance:.2f} ")
+
+    def add_earning(self, amount):
+        if amount > 0:
+            self.__balance += amount
+            print(f"{self.rider_name}, You Received {amount:.2f}. New Balance: ₦{self.__balance:.2f}")
+        else:
+            print("Invalid Deposit Amount.")
+
+    def withdraw(self, amount):
+        if 0 < amount <= self.__balance:
+            self.__balance -= amount
+            print(f"{self.rider_name}, Your Platform Servive Fees Is: N{amount:.2f}.")
+        else:
+            print("Your Account Balance Is Low")
+
+    def check_balance(self):
+        return self.__balance
 
 # creating a Rider class 
 class Rider:
@@ -37,7 +59,7 @@ class Rider:
     def __init__(self,name,bike_model):
         self.name = name 
         self.bike_model = bike_model
-        self.balance = 0
+        self.wallet = RiderWallet(self.name)
         self.deliveries = 0
 
     # this code allows Riders to see the order the Sender Created
@@ -53,16 +75,38 @@ class Rider:
         if response == "yes":
             order["assigned_to"] = self.name
             order["status"] = "Accepted"
-            self.balance += earning
+
+            self.wallet.add_earning(earning)
             self.deliveries += 1
 
             print(f"{self.name} accepted the delivery!")
             print(f"Earned ${earning}. Total deliveries: {self.deliveries}")
 
+            # this code takes out the platform fee, when the order is assigned to a rider
+            platform_fee = 500
+            print(f"Your Platform Service Fee Is: ${platform_fee:.2f}")
+            self.wallet.withdraw(platform_fee)
+
+
+            return True
+
         else:
-            print(f"{self.name} declines this order")
+            print(f"{self.name} declined this order")
             return False
-        return True
+        
+    def request_withdrawal(self):
+        print(f"{self.name}, withdrawal request portal:")
+        current_balance = self.wallet.check_balance()
+        if current_balance > 0:
+            try:
+                amount = float(input("Enter the amount you wish to withdraw: "))
+                self.wallet.withdraw(amount)
+            except ValueError:
+                print("Invalid input, Enter a numeric number:")
+
+        else:
+            print("You have no funds to withdraw!")
+    
 sender1 = Sender()
 order = sender1.create_order()
 
@@ -84,3 +128,10 @@ if order["assigned_to"]:
     print(f"Order assigned to {order['assigned_to']}")
 else:
     print("No Rider accepted the order yet. it remains pending")
+
+rider_withdraw = input("Do you want wish to make a withdraw for your earnings? (yes/no) ").lower()
+if rider_withdraw == "yes":
+    rider.request_withdrawal()
+
+else:
+    print("You can pick your next order!.")
