@@ -39,16 +39,21 @@ class RiderWallet():
     def add_earning(self, amount):
         if amount > 0:
             self.__balance += amount
-            print(f"{self.rider_name}, You Received {amount:.2f}. New Balance: ₦{self.__balance:.2f}")
+            print(f"{self.rider_name}, You Received {amount:.2f}. New Balance: N{self.__balance:.2f}")
         else:
-            print("Invalid Deposit Amount.")
+            print("Invalid Deposit Amount!.")
 
     def withdraw(self, amount):
         if 0 < amount <= self.__balance:
             self.__balance -= amount
-            print(f"{self.rider_name}, Your Platform Servive Fees Is: N{amount:.2f}.")
+            print(f"{self.rider_name}, You've made a withdrawal of: N{amount:.2f}. from your account!")
         else:
-            print("Your Account Balance Is Low")
+            print("Your Account Balance Is Low!.")
+
+    def platform_deducton_fee(self, amount):
+        if 0 < amount <= self.__balance:
+            print(f"the platform fees of {amount:.2f}, has been deducted from your balance!.")
+
 
     def check_balance(self):
         return self.__balance
@@ -62,7 +67,7 @@ class Rider:
         self.wallet = RiderWallet(self.name)
         self.deliveries = 0
 
-    # this code allows Riders to see the order the Sender Created
+    # this code allows Riders to sees the order, the Sender Created
     def review_order(self, order, earning):
         print(f"{self.name}, You have a new delivery order")
         print(f"Item: {order['item']}")
@@ -80,12 +85,11 @@ class Rider:
             self.deliveries += 1
 
             print(f"{self.name} accepted the delivery!")
-            print(f"Earned ${earning}. Total deliveries: {self.deliveries}")
+            print(f"Earned N{earning}. Total deliveries: {self.deliveries}")
 
             # this code takes out the platform fee, when the order is assigned to a rider
             platform_fee = 500
-            print(f"Your Platform Service Fee Is: ${platform_fee:.2f}")
-            self.wallet.withdraw(platform_fee)
+            self.wallet.platform_deducton_fee(platform_fee)
 
 
             return True
@@ -112,26 +116,27 @@ order = sender1.create_order()
 
 # Available Riders
 riders = [
-    Rider("Tunde", "Yamaha Xpress"),
+    Rider("Bright", "Yamaha Xpress"),
     Rider("Chika", "Honda Powerbike"),
-    Rider("Yusuf", "Suzuki")
+    Rider("Okezie", "Suzuki")
 ]
 
 # Offering order to Riders
+accepted_rider = None
 
 for rider in riders:
     accepted = rider.review_order(order, earning = 1500)
     if accepted:
+        accepted_rider = rider
         break
 
-if order["assigned_to"]:
-    print(f"Order assigned to {order['assigned_to']}")
+if accepted_rider:
+    print(f"Order assigned to {accepted_rider.name}")
+    rider_withdraw = input(f"{accepted_rider.name}, do you wish to make a withdraw? (yes/no): ")
+    if rider_withdraw == "yes":
+        accepted_rider.request_withdrawal()
+    else:
+        print("You can pick your next order!")
+
 else:
     print("No Rider accepted the order yet. it remains pending")
-
-rider_withdraw = input("Do you want wish to make a withdraw for your earnings? (yes/no) ").lower()
-if rider_withdraw == "yes":
-    rider.request_withdrawal()
-
-else:
-    print("You can pick your next order!.")
